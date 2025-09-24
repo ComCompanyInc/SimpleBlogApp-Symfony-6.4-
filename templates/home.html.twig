@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Главная{% endblock %}</title>
+
+    <link rel="stylesheet" href="css/home/home.css">
+    <style>
+    {% block stylesheets %}
+        .record-card {
+            background-color: #f0f0f0;
+            margin-bottom: 10px;
+        }
+    {% endblock %}
+    </style>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        {% block javascripts %}
+
+            function deleteRecord(recordId) {
+                $.ajax({
+                    url: '{{ path('delete') }}?id=' + recordId,
+                    type: 'DELETE',
+                    success: function() {
+                        location.reload(); // или убрать элемент со страницы
+                    }
+                });
+            }
+
+            function createRecord() {
+                var title = $('#title').val();
+                var description = $('#description').val();
+
+                $.ajax({
+                    url: '{{ path('create') }}',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        title: title,
+                        description: description
+                    }),
+                    success: function() {
+                        location.reload(); // или обновить список
+                    }
+                });
+            }
+        {% endblock %}
+    </script>
+</head>
+    <br>
+        Текущий пользователь:  {{ currentUser.username }}
+    </div>
+
+    <form method="GET" action="{{ path('home') }}">
+        <input type="text" name="title" value="{{ app.request.query.get('query') }}"
+               placeholder="Введите поисковый запрос">
+        <button type="submit">Найти</button>
+    </form>
+
+    <form method="GET" action="{{ path('home') }}">
+        <button type="submit" name="page" value="{{ page - 1 }}">Пред.</button>
+        <p>Страница {{ page }} - {{ size }} записей.</p>
+        <button type="submit" name="page" value="{{ page + 1 }}">След.</button>
+    </form>
+
+    {% block body %}
+        {% for record in records %}
+            <div class="record-card">
+                <h3>{{ record.title }}</h3>
+                <p>Запись: {{ record.description }}</p>
+                <p>Автор: {{ record.author.username }}</p>
+                <p>Дата публикации: {{ record.date|date('d.m.Y')}}</p>
+
+                {% if record.author.id == currentUser.id %}
+                    <button onclick="deleteRecord('{{ record.id }}')">Убрать запись</button>
+                {% endif %}
+            </div>
+        {% endfor %}
+    {% endblock %}
+
+    <h3> Создать свое сообщение:</h3>
+    <input type="text" id="title" placeholder="Заголовок"> <br/>
+    <textarea id="description" placeholder="Описание"></textarea> <br/>
+    <button onclick="createRecord()">Создать запись</button>
+</body>
+</html>
