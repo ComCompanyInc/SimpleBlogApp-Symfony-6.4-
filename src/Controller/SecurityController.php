@@ -3,8 +3,11 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Service\SecurityService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
@@ -12,6 +15,13 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 class SecurityController extends AbstractController
 {
+    private $securityService;
+
+    public function __construct(SecurityService $securityService)
+    {
+        $this->securityService = $securityService;
+    }
+
     #[Route(path: '/login', name: 'app_login')]
     public function login(AuthenticationUtils $authenticationUtils): Response
     {
@@ -33,30 +43,17 @@ class SecurityController extends AbstractController
         throw new \LogicException('This method can be blank - it will be intercepted by the logout key on your firewall.');
     }
 
-    #[Route('/create-test-user', name: 'create_test_user')]
-    public function createTestUser(EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): Response
+    #[Route('/signIn', name: 'create_test_user', methods: ['POST'])]
+    public function createTestUser(EntityManagerInterface $entityManager, Request $request, UserPasswordHasherInterface $passwordHasher): JsonResponse
     {
-        // Проверяем, нет ли уже пользователя с таким логином
-        $existingUser = $entityManager->getRepository(User::class)->findOneBy(['login' => 'log']);
+        $data = $request->toArray(); // собираем json в массив
 
-        if ($existingUser) {
-            return new Response('Пользователь с логином "log" уже существует!');
-        }
+        return $this->securityService->createNewUser($data, $entityManager, $passwordHasher);
+    }
 
-        // Создаем нового пользователя
-        $user = new User();
-        $user->setLogin('log');
-        $user->setUsername('max');
-        $user->setActive(true);
-
-        // Хешируем пароль
-        $hashedPassword = $passwordHasher->hashPassword($user, 'pas');
-        $user->setPassword($hashedPassword);
-
-        // Сохраняем в базу данных
-        $entityManager->persist($user);
-        $entityManager->flush();
-
-        return new Response('Тестовый пользователь создан!<br>Логин: log<br>Пароль: pas<br><a href="/login">Перейти к входу</a>');
+    #[Route('/registration', name: 'registration')]
+    public function registration(Request $request): Response
+    {
+        return $this->render('security/registration.html.twig', []);
     }
 }

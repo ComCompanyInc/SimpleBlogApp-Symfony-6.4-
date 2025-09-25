@@ -17,6 +17,10 @@ security:
             lazy: true
             provider: app_user_provider  # Используем правильный провайдер
             custom_authenticator: App\Security\AppCustomAuthenticator
+
+            # Автоматически перенаправляет на логин если не авторизован
+            entry_point: App\Security\AppCustomAuthenticator
+
             logout:
                 path: app_logout
                 # where to redirect after logout
@@ -36,11 +40,18 @@ security:
             # https://symfony.com/doc/current/security/impersonating_user.html
             # switch_user: true
 
-    # Easy way to control access for large sections of your site
-    # Note: Only the *first* access control that matches will be used
+    # Hfpltk c ljcnegfvb
     access_control:
-        # - { path: ^/admin, roles: ROLE_ADMIN }
-        # - { path: ^/profile, roles: ROLE_USER }
+        # Порядок важен! Сначала более специфичные правила
+
+        # Разрешить доступ к логину и публичным страницам всем
+        - { path: ^/login$, roles: PUBLIC_ACCESS }
+        - { path: ^/registration, roles: PUBLIC_ACCESS }
+        - { path: ^/public, roles: PUBLIC_ACCESS }
+        - { path: ^/signIn, roles: PUBLIC_ACCESS }
+
+        # Защитить все остальные роуты - требовать авторизацию
+        - { path: ^/, roles: IS_AUTHENTICATED_FULLY }
 
 when@test:
     security:

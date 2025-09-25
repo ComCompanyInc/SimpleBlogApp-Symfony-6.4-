@@ -2,11 +2,8 @@
 
 namespace App\Controller;
 
-use App\Entity\Record;
 use App\Service\BlogService;
-use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
-use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\JsonResponse;
