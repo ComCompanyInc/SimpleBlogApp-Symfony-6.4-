@@ -2,12 +2,13 @@
 
 namespace App\Service;
 
-use App\Entity\Record;
-use App\Entity\User;
 use App\Repository\RecordRepository;
 use Exception;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
+/**
+ * Сервис с логикой управления блогами.
+ */
 class BlogService
 {
     const AMOUNT_OF_ITEMS = 30; // константа, отвечающая за количество записей на странице
@@ -30,6 +31,12 @@ class BlogService
         return $this->recordRepository->getRecordByTitle($title, $page, $size);
     }
 
+    /**
+     * Создание записи текущим пользователем.
+     * @param array $data Массив с содержимым записи.
+     * @param mixed $currentUser Обьект текущего пользователя.
+     * @return JsonResponse Ответ в формате json.
+     */
     public function createRecord(array $data, mixed $currentUser): JsonResponse {
         try {
             $this->recordRepository->createRecord($data, $currentUser);
@@ -40,6 +47,11 @@ class BlogService
         }
     }
 
+    /**
+     * Удаление записи текущего пользователя по id записи.
+     * @param string $id Id записи.
+     * @return bool True/False - в зависимости от успеха выполнения.
+     */
     public function deleteRecord(string $id): bool
     {
         return $this->recordRepository->deleteRecordById($id);

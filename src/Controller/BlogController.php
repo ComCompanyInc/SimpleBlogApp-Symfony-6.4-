@@ -11,6 +11,9 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
+/**
+ * Отвечает за обработку роутов относительно записей пользователей на сайте.
+ */
 class BlogController extends AbstractController
 {
     private $blogService;
@@ -22,6 +25,12 @@ class BlogController extends AbstractController
         $this->entityManager = $entityManager;
     }
 
+    /**
+     * Домашняя страница с записями пользователей, доступная только после регистрации на сайте.
+     * @param Request $request Хранит данные из запроса.
+     * @param Security $security Обьект для взятия текущего пользователя из модуля Security.
+     * @return Response .twig страница.
+     */
     #[Route('/home', name: 'home')]
     public function home(Request $request, Security $security): Response
     {
@@ -39,6 +48,11 @@ class BlogController extends AbstractController
         ]);
     }
 
+    /**
+     * Удаление записи по ее Id.
+     * @param Request $request Обьект для взятия Id записи из запроса
+     * @return JsonResponse
+     */
     #[Route('/delete', name: 'delete', methods: ['DELETE'])]
     public function delete(Request $request): JsonResponse
     {
@@ -54,6 +68,12 @@ class BlogController extends AbstractController
         return $response;
     }
 
+    /**
+     * Создание записи пользователем.
+     * @param Request $request Обьект, хранящий данные в формате Json для сохранения.
+     * @param Security $security Обьект для взятия текущего пользователя из модуля Security.
+     * @return JsonResponse Ответ в формате json.
+     */
     #[Route('/create', name: 'create', methods: ['POST'])]
     public function create(Request $request, Security $security): JsonResponse
     {

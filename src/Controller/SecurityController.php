@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use App\Entity\User;
 use App\Service\SecurityService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -13,6 +12,9 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
+/**
+ * Отвечает за обработку роутов логина и регистрации.
+ */
 class SecurityController extends AbstractController
 {
     private $securityService;
@@ -22,28 +24,39 @@ class SecurityController extends AbstractController
         $this->securityService = $securityService;
     }
 
+    /**
+     * Роут со входом
+     * @param AuthenticationUtils $authenticationUtils Обьект аутентефикации из модуля Security
+     * @return Response .twig страница
+     */
     #[Route(path: '/login', name: 'app_login')]
     public function login(AuthenticationUtils $authenticationUtils): Response
     {
-        // if ($this->getUser()) {
-        //     return $this->redirectToRoute('target_path');
-        // }
-
-        // get the login error if there is one
         $error = $authenticationUtils->getLastAuthenticationError();
-        // last username entered by the user
+
         $lastUsername = $authenticationUtils->getLastUsername();
 
         return $this->render('security/login.html.twig', ['last_username' => $lastUsername, 'error' => $error]);
     }
 
+    /**
+     * Роут с выходом (по умолчанию создан для конфигурации разлогинивания в security.yaml)
+     * @return void
+     */
     #[Route(path: '/logout', name: 'app_logout')]
     public function logout(): void
     {
         throw new \LogicException('This method can be blank - it will be intercepted by the logout key on your firewall.');
     }
 
-    #[Route('/signIn', name: 'create_test_user', methods: ['POST'])]
+    /**
+     * Страница регистрации.
+     * @param EntityManagerInterface $entityManager Обьект менеджера БД.
+     * @param Request $request Данные из запроса.
+     * @param UserPasswordHasherInterface $passwordHasher Обьект для хеширования пароля.
+     * @return JsonResponse Ответ в формате json
+     */
+    #[Route('/signIn', name: 'createUser', methods: ['POST'])]
     public function createTestUser(EntityManagerInterface $entityManager, Request $request, UserPasswordHasherInterface $passwordHasher): JsonResponse
     {
         $data = $request->toArray(); // собираем json в массив
@@ -51,6 +64,11 @@ class SecurityController extends AbstractController
         return $this->securityService->createNewUser($data, $entityManager, $passwordHasher);
     }
 
+    /**
+     * Страница регистрации.
+     * @param Request $request Данные из запроса.
+     * @return Response .twig страница
+     */
     #[Route('/registration', name: 'registration')]
     public function registration(Request $request): Response
     {

@@ -9,8 +9,18 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
+/**
+ * Сервис для управления логинами и паролями.
+ */
 class SecurityService
 {
+    /**
+     * Функция создания нового пользователя
+     * @param array $data Массив с данными о пользователе для сохранения.
+     * @param EntityManagerInterface $entityManager Обьект для управления сущностями.
+     * @param UserPasswordHasherInterface $passwordHasher Обьект для хеширования пароля.
+     * @return JsonResponse
+     */
     public function createNewUser(array $data, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): JsonResponse
     {
         $username = $data['username'];
